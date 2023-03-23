@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
 	<name>Way Better Romance (Dev)</name>
-	<packageId>divineDerivative.RomanceDev</packageId>
+	<packageId>divineDerivative.Romance</packageId>
 	<author>divineDerivative</author>
 	<url>https://github.com/divineDerivative/WayBetterRomance</url>
 	<supportedVersions>

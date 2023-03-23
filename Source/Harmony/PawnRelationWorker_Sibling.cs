@@ -12,8 +12,24 @@ namespace BetterRomance.HarmonyPatches
     [HarmonyPatch(typeof(PawnRelationWorker_Sibling), "CreateRelation")]
     public static class PawnRelationWorker_Sibling_CreateRelation
     {
+        private static string debugOutput(Pawn pawn)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append("pawn ").Append(pawn.ToStringSafe());
+
+            sb.Append(" | kindDef ").Append(pawn?.kindDef?.label ?? "is null");
+
+            sb.Append(" | def ").Append(pawn?.def.label ?? "is null");
+
+            sb.Append(" | relationSettings ").Append(SettingsUtilities.GetRelationSettings(pawn)?.spousesAllowed.ToString() ?? "is null");
+
+            return sb.ToString();
+        }
+
         public static bool Prefix(Pawn generated, Pawn other, ref PawnGenerationRequest request, PawnRelationWorker_Sibling __instance)
         {
+            LogUtil.Message("generated: " + debugOutput(generated));
+            LogUtil.Message("other: " + debugOutput(other));
             if (!other.SpouseAllowed() || !generated.SpouseAllowed())
             {
                 bool hasMother = other.GetMother() != null;
@@ -55,19 +71,22 @@ namespace BetterRomance.HarmonyPatches
                 {
                     if (mother != null && father != null)
                     {
-                    if (tryMakeLovers)
-                    {
-                        father.relations.AddDirectRelation(PawnRelationDefOf.Lover, mother);
-                    }
-                    else
-                    {
+                        if (tryMakeLovers)
+                        {
+                            father.relations.AddDirectRelation(PawnRelationDefOf.Lover, mother);
+                        }
+                        else
+                        {
                             father.relations.AddDirectRelation(PawnRelationDefOf.ExLover, mother);
                         }
                     }
                 }
                 AccessTools.Method(typeof(PawnRelationWorker_Sibling), "ResolveMyName").Invoke(__instance, new object[] { request, generated });
+                LogUtil.Message($"PawnRelationWorker_Sibling_CreateRelation_Prefix updated pawns | generated: {generated.ToStringSafe()} | other: {other.ToStringSafe()} | mother: {mother.ToStringSafe()} ({mother?.gender.ToString() ?? "unk"}) | father: {father.ToStringSafe()} ({father?.gender.ToString() ?? "unk"})");
                 return false;
             }
+            if((generated?.IsColonist ?? false) && (other?.IsColonist ?? false))
+                LogUtil.Message($"PawnRelationWorker_Sibling_CreateRelation_Prefix didn't do anything | generated: {generated.ToStringSafe()} | other: {other.ToStringSafe()}");
             return true;
         }
     }
